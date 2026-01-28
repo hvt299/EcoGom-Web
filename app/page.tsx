@@ -1,65 +1,158 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { Search, Leaf, Loader2, Calendar, MapPin } from "lucide-react";
+import { wasteApi, ScheduleResponse, Location } from "@/services/api";
+import { Waste } from "@/types/waste";
+import ScheduleCard from "@/components/ScheduleCard";
+
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+const MapWithNoSSR = dynamic(() => import("@/components/Map/Map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-slate-100 rounded-xl animate-pulse flex items-center justify-center text-slate-400">
+      Đang tải bản đồ...
+    </div>
+  ),
+});
 
 export default function Home() {
+  const [keyword, setKeyword] = useState("");
+  const [wastes, setWastes] = useState<Waste[]>([]);
+  const [loadingWaste, setLoadingWaste] = useState(false);
+
+  const debouncedKeyword = useDebounce(keyword, 500);
+
+  const [schedule, setSchedule] = useState<ScheduleResponse | null>(null);
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
+
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoadingWaste(true);
+      const data = await wasteApi.getAll(debouncedKeyword);
+      setWastes(data);
+      setLoadingWaste(false);
+    };
+
+    fetchData();
+  }, [debouncedKeyword]);
+
+  useEffect(() => {
+    const initData = async () => {
+      // A. Lấy Lịch (Thôn Đông)
+      const scheduleData = await wasteApi.getTodaySchedule("Thôn Đông");
+      setSchedule(scheduleData);
+      setLoadingSchedule(false);
+
+      // B. Lấy Danh sách điểm thu gom (Mới thêm)
+      const locationData = await wasteApi.getLocations();
+      setLocations(locationData);
+    };
+
+    initData();
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-slate-50 p-4 pb-20">
+      {/* HEADER */}
+      <div className="flex items-center justify-center gap-2 mb-8 mt-4">
+        <div className="bg-green-600 p-2 rounded-full">
+          <Leaf className="text-white w-6 h-6" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <h1 className="text-2xl font-bold text-green-800">EcoGom</h1>
+      </div>
+
+      {/* PHẦN 1: LỊCH THU GOM */}
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center gap-2 mb-2 text-slate-500 text-sm font-medium">
+          <Calendar size={14} />
+          <span>Lịch thu gom hôm nay (Thôn Đông):</span>
         </div>
-      </main>
-    </div>
+        <ScheduleCard data={schedule} loading={loadingSchedule} />
+      </div>
+
+      {/* PHẦN 2: TÌM KIẾM RÁC */}
+      <div className="max-w-md mx-auto mb-8 sticky top-4 z-10">
+        <div className="relative shadow-lg">
+          <input
+            type="text"
+            placeholder="Bạn muốn vứt gì? (VD: vỏ lon, giấy...)"
+            className="w-full pl-12 pr-4 py-4 rounded-xl border-none focus:ring-2 focus:ring-green-500 text-lg"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
+
+          {loadingWaste && (
+            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-green-600 w-5 h-5 animate-spin" />
+          )}
+        </div>
+      </div>
+
+      {/* KẾT QUẢ TÌM KIẾM */}
+      <div className="max-w-md mx-auto grid gap-4">
+        {wastes.length === 0 && !loadingWaste ? (
+          <div className="text-center text-gray-400 mt-10">
+            <p>Không tìm thấy loại rác nào phù hợp.</p>
+            <p className="text-sm mt-2">Hãy thử từ khóa khác như "nhựa", "giấy"...</p>
+          </div>
+        ) : (
+          wastes.map((waste) => (
+            <div
+              key={waste._id}
+              className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-bold text-lg text-slate-800">{waste.name}</h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Gọi là: {waste.local_names.join(", ")}
+                  </p>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${waste.category === "Tái chế"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                    }`}
+                >
+                  {waste.category}
+                </span>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-50 flex justify-between items-center">
+                <span className="text-sm text-slate-400">Giá tham khảo:</span>
+                <span className="font-bold text-green-600">{waste.estimated_price}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* PHẦN 3: BẢN ĐỒ */}
+      <div className="max-w-md mx-auto mt-8">
+        <div className="flex items-center gap-2 mb-3 text-slate-700 font-bold">
+          <MapPin className="text-red-500" size={20} />
+          <h2>Điểm thu gom gần bạn</h2>
+        </div>
+
+        <div className="shadow-lg rounded-xl overflow-hidden border border-slate-200">
+          <MapWithNoSSR
+            locations={locations}
+            center={[21.028511, 105.854444]}
+          />
+        </div>
+      </div>
+    </main>
   );
 }
