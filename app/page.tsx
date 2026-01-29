@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Search, Leaf, Loader2, Calendar, MapPin } from "lucide-react";
-import { wasteApi, ScheduleResponse, Location } from "@/services/api";
+import { wasteApi, scheduleApi, locationApi } from "@/services/api";
 import { Waste } from "@/types/waste";
+import { ScheduleResponse } from "@/types/schedule";
+import { Location } from "@/types/location";
 import ScheduleCard from "@/components/ScheduleCard";
 
 function useDebounce(value: string, delay: number) {
@@ -50,13 +52,11 @@ export default function Home() {
 
   useEffect(() => {
     const initData = async () => {
-      // A. Lấy Lịch (Thôn Đông)
-      const scheduleData = await wasteApi.getTodaySchedule("Thôn Đông");
+      const scheduleData = await scheduleApi.getTodaySchedule("Thôn Đông");
       setSchedule(scheduleData);
       setLoadingSchedule(false);
 
-      // B. Lấy Danh sách điểm thu gom (Mới thêm)
-      const locationData = await wasteApi.getLocations();
+      const locationData = await locationApi.getLocations();
       setLocations(locationData);
     };
 

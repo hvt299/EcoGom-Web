@@ -1,5 +1,5 @@
 import { Calendar, Clock, AlertTriangle, Truck } from "lucide-react";
-import { ScheduleResponse } from "@/services/api";
+import { ScheduleResponse } from "@/types/schedule";
 
 interface Props {
     data: ScheduleResponse | null;
