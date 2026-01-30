@@ -4,7 +4,7 @@ import { Schedule } from "@/types/schedule";
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    schedule: Schedule | null; // Dữ liệu lịch đầy đủ (bao gồm cả tuần)
+    schedule: Schedule | null;
 }
 
 export default function ScheduleDetailModal({ isOpen, onClose, schedule }: Props) {
@@ -12,9 +12,7 @@ export default function ScheduleDetailModal({ isOpen, onClose, schedule }: Props
 
     const getDayName = (day: number) => ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"][day];
 
-    // Sắp xếp lịch từ Thứ 2 đến CN
     const sortedSchedule = [...schedule.standard_schedule].sort((a, b) => {
-        // Chuyển CN (0) thành 7 để sắp xếp cuối cùng
         const dayA = a.day_of_week === 0 ? 7 : a.day_of_week;
         const dayB = b.day_of_week === 0 ? 7 : b.day_of_week;
         return dayA - dayB;
@@ -67,7 +65,7 @@ export default function ScheduleDetailModal({ isOpen, onClose, schedule }: Props
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t bg-slate-50 text-center">
+                <div className="p-4 border-t border-slate-100 bg-slate-50 text-center">
                     <button
                         onClick={onClose}
                         className="w-full py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition"
