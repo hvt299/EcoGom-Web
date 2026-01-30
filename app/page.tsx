@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Search, Leaf, Loader2, Calendar, MapPin, ChevronDown, Info, Phone, Mail, Facebook, Bell } from "lucide-react";
+import { Search, Leaf, Loader2, Calendar, MapPin, ChevronDown, Info, Phone, Mail, Facebook, Bell, X, Check } from "lucide-react";
 import { wasteApi, scheduleApi, locationApi } from "@/services/api";
 import { Waste } from "@/types/waste";
 import { ScheduleResponse, Schedule, SpecialEvent } from "@/types/schedule";
 import { Location } from "@/types/location";
 import ScheduleCard from "@/components/ScheduleCard";
 import ScheduleDetailModal from "@/components/ScheduleDetailModal";
+import { processScheduleData } from "@/utils/dataProcessor";
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -37,6 +38,8 @@ export default function Home() {
 
   const [villages, setVillages] = useState<string[]>([]);
   const [selectedVillage, setSelectedVillage] = useState<string>("");
+  const [groupedVillages, setGroupedVillages] = useState<Record<string, string[]>>({});
+  const [showVillageModal, setShowVillageModal] = useState(false);
 
   const [todaySchedule, setTodaySchedule] = useState<ScheduleResponse | null>(null);
   const [fullSchedule, setFullSchedule] = useState<Schedule | null>(null);
@@ -52,10 +55,12 @@ export default function Home() {
     const initData = async () => {
       const allSchedules = await scheduleApi.getAll();
       if (allSchedules && allSchedules.length > 0) {
-        const villageNames = allSchedules.map((s: Schedule) => s.village_name);
-        setVillages(villageNames);
-        if (!villageNames.includes(selectedVillage)) {
-          setSelectedVillage(villageNames[0]);
+        const { groupedVillages, wards, defaultVillage } = processScheduleData(allSchedules);
+
+        setGroupedVillages(groupedVillages);
+
+        if (!selectedVillage) {
+          setSelectedVillage(defaultVillage);
         }
       }
 
@@ -111,6 +116,52 @@ export default function Home() {
     fetchWastes();
   }, [debouncedKeyword]);
 
+  const VillageModal = () => {
+    if (!showVillageModal) return null;
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+          {/* Header */}
+          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-green-50">
+            <div>
+              <h3 className="font-bold text-lg text-slate-800">Chọn khu vực của bạn</h3>
+              <p className="text-xs text-slate-500">Vui lòng chọn đúng thôn để xem lịch chính xác nhất</p>
+            </div>
+            <button onClick={() => setShowVillageModal(false)} className="p-2 hover:bg-white rounded-full transition text-slate-500">
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Body: Grid Layout */}
+          <div className="p-6 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.keys(groupedVillages).map((ward) => (
+                <div key={ward} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <h4 className="font-bold text-green-700 mb-3 uppercase text-xs tracking-wider border-b border-slate-200 pb-2">{ward}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {groupedVillages[ward].map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => { setSelectedVillage(v); setShowVillageModal(false); }}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${selectedVillage === v
+                          ? "bg-green-600 text-white shadow-md shadow-green-200"
+                          : "bg-white text-slate-600 border border-slate-200 hover:border-green-400 hover:text-green-600"
+                          }`}
+                      >
+                        {v}
+                        {selectedVillage === v && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col">
 
@@ -129,17 +180,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Village Selector (Glassmorphism) */}
-            <div className="relative group">
-              <select
-                className="appearance-none bg-black/20 backdrop-blur-md text-white font-semibold text-sm py-2 pl-4 pr-9 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer hover:bg-black/30 transition border border-white/10"
-                value={selectedVillage}
-                onChange={(e) => setSelectedVillage(e.target.value)}
-              >
-                {villages.map(v => <option key={v} value={v} className="text-slate-800">{v}</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 w-4 h-4 pointer-events-none" />
-            </div>
+            {/* Village Selector (Modal) */}
+            <button
+              onClick={() => setShowVillageModal(true)}
+              className="bg-black/20 backdrop-blur-md text-white font-semibold text-sm py-2 px-4 rounded-full hover:bg-black/30 transition border border-white/10 flex items-center gap-2"
+            >
+              {selectedVillage || "Chọn khu vực"}
+              <ChevronDown size={14} className="opacity-80" />
+            </button>
           </div>
 
           {/* Greeting */}
@@ -287,6 +335,7 @@ export default function Home() {
       </footer>
 
       {/* MODAL */}
+      <VillageModal />
       <ScheduleDetailModal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
