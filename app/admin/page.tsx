@@ -14,13 +14,13 @@ export default function AdminLogin() {
         e.preventDefault();
         const response = await adminApi.login(code);
 
-        if (response && response.success) {
+        if (response && response.access_token) {
             localStorage.setItem("isAdmin", "true");
-            // localStorage.setItem("token", response.token);
+            localStorage.setItem("token", response.access_token);
             toast.success("Đăng nhập thành công!");
             router.push("/admin/dashboard");
         } else {
-            toast.error("Sai mã bí mật rồi!");
+            toast.error("Mật khẩu sai rồi!");
         }
     };
 
@@ -40,8 +40,8 @@ export default function AdminLogin() {
                 <form onSubmit={handleLogin}>
                     <input
                         type="password"
-                        placeholder="Nhập mã bí mật..."
-                        className="w-full p-3 rounded-lg border border-slate-300 mb-4 focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="Nhập mật khẩu..."
+                        className="w-full p-3 rounded-lg border border-slate-300 mb-4 focus:ring-2 focus:ring-green-500 outline-none text-slate-900 bg-white placeholder:text-slate-400"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                     />
@@ -52,9 +52,6 @@ export default function AdminLogin() {
                         Đăng nhập
                     </button>
                 </form>
-                <p className="text-center text-slate-400 text-sm mt-4">
-                    *Mã mặc định là Admin
-                </p>
             </div>
         </div>
     );
