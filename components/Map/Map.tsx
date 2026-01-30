@@ -1,6 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -25,6 +26,14 @@ interface MapProps {
     center: [number, number]; // [Lat, Long]
 }
 
+function RecenterAutomatically({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([lat, lng], 14, { duration: 2 });
+  }, [lat, lng, map]);
+  return null;
+}
+
 export default function Map({ locations, center }: MapProps) {
     return (
         <MapContainer
@@ -36,6 +45,12 @@ export default function Map({ locations, center }: MapProps) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
+
+            <RecenterAutomatically lat={center[0]} lng={center[1]} />
+
+            <Marker position={center} icon={icon}> 
+                <Popup>Vị trí của bạn</Popup>
+            </Marker>
 
             {locations.map((loc) => (
                 <Marker
