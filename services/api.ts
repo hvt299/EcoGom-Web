@@ -115,8 +115,22 @@ export const locationApi = {
   },
 };
 
-export const authApi = {
-  login: (code: string) => {
-    return code === "admin123";
+export const adminApi = {
+  login: async (passcode: string) => {
+    try {
+      const res = await api.post('/admin/login', { passcode });
+      return res.data;
+    } catch (error) {
+      return null;
+    }
   },
+  
+  getStats: async () => {
+    try {
+      const res = await api.get('/admin/stats');
+      return res.data; 
+    } catch (error) {
+      return null;
+    }
+  }
 };

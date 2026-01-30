@@ -3,17 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
-import { authApi } from "@/services/api";
+import { adminApi } from "@/services/api";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function AdminLogin() {
     const [code, setCode] = useState("");
     const router = useRouter();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (authApi.login(code)) {
+        const response = await adminApi.login(code);
+
+        if (response && response.success) {
             localStorage.setItem("isAdmin", "true");
+            // localStorage.setItem("token", response.token);
             toast.success("Đăng nhập thành công!");
             router.push("/admin/dashboard");
         } else {
@@ -50,7 +53,7 @@ export default function AdminLogin() {
                     </button>
                 </form>
                 <p className="text-center text-slate-400 text-sm mt-4">
-                    *Mã mặc định là admin123
+                    *Mã mặc định là Admin
                 </p>
             </div>
         </div>

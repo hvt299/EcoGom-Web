@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Package, MapPin, Calendar, Trash2 } from "lucide-react";
+import { LogOut, Package, MapPin, Calendar, Trash2, LayoutDashboard } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import Overview from "./components/Overview";
 import WasteManager from "./components/WasteManager";
 import LocationManager from "./components/LocationManager";
 import ScheduleManager from "./components/ScheduleManager";
 
 export default function Dashboard() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'wastes' | 'schedules' | 'locations'>('wastes');
+    const [activeTab, setActiveTab] = useState<'overview' | 'wastes' | 'schedules' | 'locations'>('overview');
 
     useEffect(() => {
         const isAdmin = localStorage.getItem("isAdmin");
@@ -44,6 +45,16 @@ export default function Dashboard() {
             <div className="max-w-6xl mx-auto mt-6 px-6">
                 <div className="flex gap-2 border-b border-slate-200 overflow-x-auto">
                     <button
+                        onClick={() => setActiveTab('overview')}
+                        className={`px-4 py-3 font-bold flex items-center gap-2 whitespace-nowrap transition-colors ${
+                            activeTab === 'overview' 
+                            ? 'text-green-600 border-b-2 border-green-600' 
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                    >
+                        <LayoutDashboard size={18} /> Tổng quan
+                    </button>
+                    <button
                         onClick={() => setActiveTab('wastes')}
                         className={`px-4 py-3 font-bold flex items-center gap-2 whitespace-nowrap transition-colors ${activeTab === 'wastes'
                                 ? 'text-green-600 border-b-2 border-green-600'
@@ -75,6 +86,7 @@ export default function Dashboard() {
 
             {/* Nội dung chính (Thay đổi theo Tab) */}
             <div className="max-w-6xl mx-auto p-6">
+                {activeTab === 'overview' && <Overview />}
                 {activeTab === 'wastes' && <WasteManager />}
                 {activeTab === 'schedules' && <ScheduleManager />}
                 {activeTab === 'locations' && <LocationManager />}
