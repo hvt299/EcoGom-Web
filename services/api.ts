@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Waste } from '@/types/waste';
-import { ScheduleResponse } from '@/types/schedule';
+import { Schedule, ScheduleResponse } from '@/types/schedule';
 import { Location } from '@/types/location';
 
 const api = axios.create({
@@ -61,11 +61,14 @@ export const wasteApi = {
 };
 
 export const scheduleApi = {
-  getAll: async () => {
+  getAll: async (): Promise<Schedule[]> => {
     try {
       const res = await api.get('/schedules'); 
       return res.data;
-    } catch (e) { return []; }
+    } catch (error) {
+      console.error('Lỗi lấy lịch:', error);
+      return [];
+    }
   },
 
   getTodaySchedule: async (villageName: string): Promise<ScheduleResponse | null> => {
@@ -76,6 +79,17 @@ export const scheduleApi = {
       return response.data;
     } catch (error) {
       console.error('Lỗi lấy lịch:', error);
+      return null;
+    }
+  },
+
+  getFullByVillage: async (villageName: string) => {
+    try {
+      const response = await api.get('/schedules/detail', { 
+        params: { village: villageName } 
+      });
+      return response.data;
+    } catch (error) {
       return null;
     }
   },
@@ -94,11 +108,7 @@ export const scheduleApi = {
 };
 
 export const locationApi = {
-  getAll: async () => {
-    try { return (await api.get('/locations')).data; } catch (e) { return []; }
-  },
-
-  getLocations: async (): Promise<Location[]> => {
+  getAll: async (): Promise<Location[]> => {
     try {
       const response = await api.get('/locations'); 
       return response.data;

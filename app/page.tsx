@@ -83,8 +83,7 @@ export default function Home() {
       const todayData = await scheduleApi.getTodaySchedule(selectedVillage);
       setTodaySchedule(todayData);
 
-      const allSchedules = await scheduleApi.getAll();
-      const currentFull = allSchedules.find((s: Schedule) => s.village_name === selectedVillage);
+      const currentFull = await scheduleApi.getFullByVillage(selectedVillage);
       setFullSchedule(currentFull || null);
 
       if (currentFull && currentFull.special_events) {
@@ -146,7 +145,7 @@ export default function Home() {
           {/* Greeting */}
           <div className="mb-6">
             <p className="text-green-100 text-sm">Chào bạn,</p>
-            <h2 className="text-2xl font-bold">Hôm nay bạn muốn vứt bỏ gì?</h2>
+            <h2 className="text-2xl font-bold">Hôm nay bạn muốn vứt bỏ gì nào?</h2>
           </div>
         </div>
       </div>
@@ -181,7 +180,7 @@ export default function Home() {
                 onClick={() => setShowDetailModal(true)}
                 className="text-green-600 flex items-center gap-1 hover:bg-green-50 px-2 py-1 rounded-lg transition text-xs font-semibold"
               >
-                <Info size={12} /> Xem cả tuần
+                <Info size={12} /> Chi tiết tuần
               </button>
             </div>
 
@@ -200,7 +199,7 @@ export default function Home() {
                       <div>
                         <p className="font-bold text-slate-800 text-sm">{ev.name}</p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {new Date(ev.start_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} - {new Date(ev.end_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
+                          {new Date(ev.start_date).toLocaleDateString('vi-VN')} - {new Date(ev.end_date).toLocaleDateString('vi-VN')}
                         </p>
                       </div>
                       {ev.is_cancelled && (
@@ -252,7 +251,7 @@ export default function Home() {
           <div className="mt-8 mb-8">
             <div className="flex items-center gap-2 mb-3 text-slate-600 text-sm font-bold px-1">
               <MapPin className="text-blue-500" size={16} />
-              <h2>Điểm thu gom gần đây</h2>
+              <h2>Điểm thu gom gần bạn</h2>
             </div>
             <div className="shadow-lg rounded-2xl overflow-hidden border border-slate-200 ring-4 ring-white">
               <MapWithNoSSR locations={locations} center={userLocation || [21.028511, 105.854444]} />
