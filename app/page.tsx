@@ -10,6 +10,7 @@ import { Location } from "@/types/location";
 import ScheduleCard from "@/components/ScheduleCard";
 import ScheduleDetailModal from "@/components/ScheduleDetailModal";
 import { processScheduleData } from "@/utils/dataProcessor";
+import { getWasteCategoryStyle, formatCurrency } from "@/utils/wasteHelper";
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -272,24 +273,32 @@ export default function Home() {
                 <p className="text-slate-500 font-medium">Không tìm thấy rác này</p>
               </div>
             ) : (
-              wastes.map((waste) => (
-                <div key={waste._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-slate-800">{waste.name}</h3>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${waste.category === "Tái chế" ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
-                      }`}>
-                      {waste.category}
-                    </span>
+              wastes.map((waste) => {
+                const styleParams = getWasteCategoryStyle(waste.category);
+
+                return (
+                  <div key={waste._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-slate-800">{waste.name}</h3>
+                      <span style={{ backgroundColor: styleParams.bgColor, color: styleParams.color }}
+                        className="px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                        {styleParams.label}
+                      </span>
+                    </div>
+                    {waste.local_names.length > 0 && (
+                      <p className="text-xs text-slate-500 mb-3">Gọi là: {waste.local_names.join(", ")}</p>
+                    )}
+                    <div className="flex justify-between border-t border-slate-50 pt-2 text-sm">
+                      <span className="text-slate-400">Giá tham khảo:</span>
+                      <span className="font-bold text-green-600">
+                        {waste.estimated_price > 0
+                          ? `${formatCurrency(waste.estimated_price)} / ${waste.unit}`
+                          : "---"}
+                      </span>
+                    </div>
                   </div>
-                  {waste.local_names.length > 0 && (
-                    <p className="text-xs text-slate-500 mb-3">Gọi là: {waste.local_names.join(", ")}</p>
-                  )}
-                  <div className="flex justify-between border-t border-slate-50 pt-2 text-sm">
-                    <span className="text-slate-400">Giá:</span>
-                    <span className="font-bold text-green-600">{waste.estimated_price}</span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
