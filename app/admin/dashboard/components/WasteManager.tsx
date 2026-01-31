@@ -5,14 +5,16 @@ import { Trash2, Plus, Save, Pencil, X } from "lucide-react";
 import { Waste } from "@/types/waste";
 import { wasteApi } from "@/services/api";
 import toast from "react-hot-toast";
+import { formatCurrency, getWasteCategoryStyle } from "@/utils/wasteHelper";
 
 export default function WasteManager() {
     const [wastes, setWastes] = useState<Waste[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [newName, setNewName] = useState("");
-    const [newPrice, setNewPrice] = useState("");
-    const [newCategory, setNewCategory] = useState("Tái chế");
+    const [newUnit, setNewUnit] = useState("kg");
+    const [newPrice, setNewPrice] = useState<number>(0);
+    const [newCategory, setNewCategory] = useState("Chất thải rắn có khả năng tái sử dụng, tái chế");
     const [localNames, setLocalNames] = useState("");
     const [processStep, setProcessStep] = useState("");
 
@@ -30,7 +32,7 @@ export default function WasteManager() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newName || !newPrice) return toast.error("Vui lòng nhập Tên và Giá");
+        if (!newName) return toast.error("Vui lòng nhập Tên rác");
 
         const localNamesArray = localNames
             ? localNames.split(",").map(name => name.trim()).filter(Boolean)
@@ -42,7 +44,8 @@ export default function WasteManager() {
 
         const wasteData = {
             name: newName,
-            estimated_price: newPrice,
+            unit: newUnit,
+            estimated_price: Number(newPrice),
             category: newCategory,
             local_names: localNamesArray,
             processing_steps: stepsArray,
@@ -69,7 +72,8 @@ export default function WasteManager() {
     const handleEdit = (item: Waste) => {
         setEditingId(item._id);
         setNewName(item.name);
-        setNewPrice(item.estimated_price);
+        setNewUnit(item.unit || "kg");
+        setNewPrice(item.estimated_price || 0);
         setNewCategory(item.category);
         setLocalNames(item.local_names ? item.local_names.join(", ") : "");
         setProcessStep(item.processing_steps && item.processing_steps.length > 0
@@ -82,9 +86,9 @@ export default function WasteManager() {
 
     const handleCancelEdit = () => {
         setEditingId(null);
-        setNewName(""); setNewPrice("");
+        setNewName(""); setNewUnit("kg"); setNewPrice(0);
         setLocalNames(""); setProcessStep("");
-        setNewCategory("Tái chế");
+        setNewCategory("Chất thải rắn có khả năng tái sử dụng, tái chế");
     };
 
     const handleDelete = async (id: string) => {
@@ -129,9 +133,14 @@ export default function WasteManager() {
                                     value={newName} onChange={e => setNewName(e.target.value)} placeholder="VD: Sắt vụn" />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Giá (đ/kg) *</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Giá tiền (VNĐ)</label>
+                                <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                    value={newPrice} onChange={e => setNewPrice(Number(e.target.value))} placeholder="0" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Đơn vị tính</label>
                                 <input className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                    value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="VD: 5.000" />
+                                    value={newUnit} onChange={e => setNewUnit(e.target.value)} placeholder="kg, cái, chiếc..." />
                             </div>
                         </div>
                         <div>
@@ -148,16 +157,15 @@ export default function WasteManager() {
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Phân loại</label>
                             <select className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
                                 value={newCategory} onChange={e => setNewCategory(e.target.value)}>
-                                <option value="Tái chế">Tái chế</option>
-                                <option value="Nguy hại">Nguy hại</option>
-                                <option value="Khó phân hủy">Khó phân hủy</option>
-                                <option value="Hữu cơ">Hữu cơ</option>
+                                <option value="Chất thải rắn có khả năng tái sử dụng, tái chế">Tái chế & Tái sử dụng</option>
+                                <option value="Chất thải thực phẩm">Rác thực phẩm</option>
+                                <option value="Chất thải rắn sinh hoạt khác">Rác sinh hoạt khác</option>
                             </select>
                         </div>
 
                         <button type="submit" className={`w-full font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition shadow-lg ${editingId
-                                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
-                                : "bg-green-600 hover:bg-green-700 text-white shadow-green-200"
+                            ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
+                            : "bg-green-600 hover:bg-green-700 text-white shadow-green-200"
                             }`}>
                             <Save size={18} /> {editingId ? "Cập nhật" : "Lưu dữ liệu"}
                         </button>
@@ -186,14 +194,23 @@ export default function WasteManager() {
                                             {item.local_names?.length > 0 && <p className="text-xs text-slate-500 mt-1">{item.local_names.join(", ")}</p>}
                                         </td>
                                         <td className="p-4 align-top">
-                                            <p className="text-green-600 font-bold text-sm">{item.estimated_price}</p>
+                                            <p className="text-green-600 font-bold text-sm">{item.estimated_price > 0 ? `${formatCurrency(item.estimated_price)} / ${item.unit}` : "---"}</p>
                                             {item.processing_steps?.length > 0 && <p className="text-xs text-slate-400 mt-1 italic">HD: {item.processing_steps[0].content}</p>}
                                         </td>
                                         <td className="p-4 align-top">
-                                            <span className={`px-2 py-1 text-xs rounded-full font-semibold border ${item.category === 'Tái chế' ? 'bg-green-50 text-green-700 border-green-100' :
-                                                item.category === 'Nguy hại' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                    'bg-slate-100 text-slate-600 border-slate-200'
-                                                }`}>{item.category}</span>
+                                            {(() => {
+                                                const style = getWasteCategoryStyle(item.category);
+                                                return (
+                                                    <span style={{
+                                                        backgroundColor: style.bgColor,
+                                                        color: style.color,
+                                                        borderColor: style.borderColor,
+                                                        borderWidth: 1
+                                                    }} className="px-2 py-1 text-xs rounded-full font-semibold border">
+                                                        {style.label}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4 text-right align-top">
                                             <div className="flex justify-end gap-2">
