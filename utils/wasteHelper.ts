@@ -1,3 +1,5 @@
+import { Leaf, Recycle, Trash2, HelpCircle } from "lucide-react";
+
 export const getWasteCategoryStyle = (category: string) => {
     const normalized = category?.trim();
 
@@ -6,7 +8,8 @@ export const getWasteCategoryStyle = (category: string) => {
             label: "Rác tái chế",
             color: "#16a34a",
             bgColor: "#dcfce7",
-            borderColor: "#bbf7d0"
+            borderColor: "#bbf7d0",
+            icon: Recycle
         };
     }
 
@@ -15,7 +18,8 @@ export const getWasteCategoryStyle = (category: string) => {
             label: "Rác thực phẩm",
             color: "#ea580c",
             bgColor: "#ffedd5",
-            borderColor: "#fed7aa"
+            borderColor: "#fed7aa",
+            icon: Leaf
         };
     }
 
@@ -24,7 +28,8 @@ export const getWasteCategoryStyle = (category: string) => {
             label: "Rác khác",
             color: "#dc2626",
             bgColor: "#fee2e2",
-            borderColor: "#fecaca"
+            borderColor: "#fecaca",
+            icon: Trash2
         };
     }
 
@@ -32,7 +37,8 @@ export const getWasteCategoryStyle = (category: string) => {
         label: "Chưa phân loại",
         color: "#64748b",
         bgColor: "#f1f5f9",
-        borderColor: "#e2e8f0"
+        borderColor: "#e2e8f0",
+        icon: HelpCircle
     };
 };
 

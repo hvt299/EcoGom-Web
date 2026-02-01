@@ -9,6 +9,7 @@ import { ScheduleResponse, Schedule, SpecialEvent } from "@/types/schedule";
 import { Location } from "@/types/location";
 import ScheduleCard from "@/components/ScheduleCard";
 import ScheduleDetailModal from "@/components/ScheduleDetailModal";
+import WasteDetailModal from "@/components/WasteDetailModal";
 import { processScheduleData } from "@/utils/dataProcessor";
 import { getWasteCategoryStyle, formatCurrency } from "@/utils/wasteHelper";
 
@@ -36,6 +37,7 @@ export default function Home() {
 
   const [wastes, setWastes] = useState<Waste[]>([]);
   const [loadingWaste, setLoadingWaste] = useState(false);
+  const [selectedWaste, setSelectedWaste] = useState<Waste | null>(null);
 
   const [villages, setVillages] = useState<string[]>([]);
   const [selectedVillage, setSelectedVillage] = useState<string>("");
@@ -277,12 +279,12 @@ export default function Home() {
                 const styleParams = getWasteCategoryStyle(waste.category);
 
                 return (
-                  <div key={waste._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                  <div key={waste._id} onClick={() => setSelectedWaste(waste)} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-slate-800">{waste.name}</h3>
                       <span style={{ backgroundColor: styleParams.bgColor, color: styleParams.color }}
-                        className="px-2 py-0.5 rounded text-[10px] font-bold uppercase">
-                        {styleParams.label}
+                        className="px-2 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-1">
+                        <styleParams.icon size={12} /> {styleParams.label}
                       </span>
                     </div>
                     {waste.local_names.length > 0 && (
@@ -349,6 +351,11 @@ export default function Home() {
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         schedule={fullSchedule}
+      />
+      <WasteDetailModal
+        isOpen={!!selectedWaste}
+        onClose={() => setSelectedWaste(null)}
+        waste={selectedWaste}
       />
 
     </main>
