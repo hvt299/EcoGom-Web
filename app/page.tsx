@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Search, Leaf, Loader2, Calendar, MapPin, ChevronDown, Info, Phone, Mail, Facebook, Bell, X, Check } from "lucide-react";
+import { Leaf, Calendar, MapPin, ChevronDown, Info, Phone, Mail, Facebook, Bell, Check, X } from "lucide-react";
 import { wasteApi, scheduleApi, locationApi } from "@/services/api";
 import { Waste } from "@/types/waste";
 import { ScheduleResponse, Schedule, SpecialEvent } from "@/types/schedule";
 import { Location } from "@/types/location";
-import ScheduleCard from "@/components/ScheduleCard";
-import ScheduleDetailModal from "@/components/ScheduleDetailModal";
-import WasteDetailModal from "@/components/WasteDetailModal";
+
+import SearchInput from "@/components/Home/SearchInput";
+import FilterTabs from "@/components/Home/FilterTabs";
+import WasteList from "@/components/Home/WasteList";
+import VillageModal from "@/components/Home/VillageModal";
+
+import ScheduleCard from "@/components/Home/ScheduleCard";
+import ScheduleDetailModal from "@/components/Home/ScheduleDetailModal";
+import WasteDetailModal from "@/components/Home/WasteDetailModal";
 import { processScheduleData } from "@/utils/dataProcessor";
-import { getWasteCategoryStyle, formatCurrency } from "@/utils/wasteHelper";
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -34,12 +39,12 @@ const MapWithNoSSR = dynamic(() => import("@/components/Map/Map"), {
 export default function Home() {
   const [keyword, setKeyword] = useState("");
   const debouncedKeyword = useDebounce(keyword, 500);
+  const [activeFilter, setActiveFilter] = useState("ALL");
 
   const [wastes, setWastes] = useState<Waste[]>([]);
   const [loadingWaste, setLoadingWaste] = useState(false);
   const [selectedWaste, setSelectedWaste] = useState<Waste | null>(null);
 
-  const [villages, setVillages] = useState<string[]>([]);
   const [selectedVillage, setSelectedVillage] = useState<string>("");
   const [groupedVillages, setGroupedVillages] = useState<Record<string, string[]>>({});
   const [showVillageModal, setShowVillageModal] = useState(false);
@@ -119,51 +124,10 @@ export default function Home() {
     fetchWastes();
   }, [debouncedKeyword]);
 
-  const VillageModal = () => {
-    if (!showVillageModal) return null;
-    return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-          {/* Header */}
-          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-green-50">
-            <div>
-              <h3 className="font-bold text-lg text-slate-800">Chọn khu vực của bạn</h3>
-              <p className="text-xs text-slate-500">Vui lòng chọn đúng thôn để xem lịch chính xác nhất</p>
-            </div>
-            <button onClick={() => setShowVillageModal(false)} className="p-2 hover:bg-white rounded-full transition text-slate-500">
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Body: Grid Layout */}
-          <div className="p-6 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.keys(groupedVillages).map((ward) => (
-                <div key={ward} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                  <h4 className="font-bold text-green-700 mb-3 uppercase text-xs tracking-wider border-b border-slate-200 pb-2">{ward}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {groupedVillages[ward].map((v) => (
-                      <button
-                        key={v}
-                        onClick={() => { setSelectedVillage(v); setShowVillageModal(false); }}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${selectedVillage === v
-                          ? "bg-green-600 text-white shadow-md shadow-green-200"
-                          : "bg-white text-slate-600 border border-slate-200 hover:border-green-400 hover:text-green-600"
-                          }`}
-                      >
-                        {v}
-                        {selectedVillage === v && <Check size={14} />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const filteredWastes = wastes.filter(waste => {
+    if (activeFilter === "ALL") return true;
+    return waste.category?.trim() === activeFilter;
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col">
@@ -201,26 +165,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 2. MAIN CONTENT CONTAINER (Kéo lên đè vào Header) */}
+      {/* 2. MAIN CONTENT CONTAINER */}
       <div className="max-w-md mx-auto px-4 -mt-10 w-full flex-1">
+        {/* Component: SEARCH INPUT */}
+        <SearchInput keyword={keyword} setKeyword={setKeyword} loading={loadingWaste} />
 
-        {/* THANH TÌM KIẾM (Nổi bật) */}
-        <div className="relative shadow-xl shadow-slate-200/50 rounded-2xl bg-white mb-6 z-20">
-          <input
-            type="text"
-            placeholder="Tìm rác (VD: pin, vỏ lon...)"
-            className="w-full pl-12 pr-4 py-4 rounded-2xl border-none focus:ring-2 focus:ring-green-500 text-slate-700 font-medium placeholder:font-normal placeholder:text-slate-400 outline-none"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 w-5 h-5" />
-          {loadingWaste && (
-            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-green-600 w-5 h-5 animate-spin" />
-          )}
-        </div>
+        {/* Component: FILTER TABS */}
+        <FilterTabs activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
 
-        {/* SECTION: LỊCH THU GOM */}
-        {!keyword && (
+        {/* SECTION: LỊCH THU GOM & BẢN ĐỒ */}
+        {!keyword && activeFilter === "ALL" && (
           <div className="animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between text-slate-600 text-sm font-bold mb-3 px-1">
               <div className="flex items-center gap-1.5">
@@ -261,63 +215,29 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* SECTION: KẾT QUẢ TÌM KIẾM */}
-        {keyword && (
-          <div className="grid gap-3 mb-8">
-            {wastes.length === 0 && !loadingWaste ? (
-              <div className="text-center py-12">
-                <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="text-slate-300 w-10 h-10" />
-                </div>
-                <p className="text-slate-500 font-medium">Không tìm thấy rác này</p>
+            <div className="mt-8 mb-8">
+              <div className="flex items-center gap-2 mb-3 text-slate-600 text-sm font-bold px-1">
+                <MapPin className="text-blue-500" size={16} />
+                <h2>Điểm thu gom gần bạn</h2>
               </div>
-            ) : (
-              wastes.map((waste) => {
-                const styleParams = getWasteCategoryStyle(waste.category);
-
-                return (
-                  <div key={waste._id} onClick={() => setSelectedWaste(waste)} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-slate-800">{waste.name}</h3>
-                      <span style={{ backgroundColor: styleParams.bgColor, color: styleParams.color }}
-                        className="px-2 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-1">
-                        <styleParams.icon size={12} /> {styleParams.label}
-                      </span>
-                    </div>
-                    {waste.local_names.length > 0 && (
-                      <p className="text-xs text-slate-500 mb-3">Gọi là: {waste.local_names.join(", ")}</p>
-                    )}
-                    <div className="flex justify-between border-t border-slate-50 pt-2 text-sm">
-                      <span className="text-slate-400">Giá tham khảo:</span>
-                      <span className="font-bold text-green-600">
-                        {waste.estimated_price > 0
-                          ? `${formatCurrency(waste.estimated_price)} / ${waste.unit}`
-                          : "---"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {/* SECTION: BẢN ĐỒ */}
-        {!keyword && (
-          <div className="mt-8 mb-8">
-            <div className="flex items-center gap-2 mb-3 text-slate-600 text-sm font-bold px-1">
-              <MapPin className="text-blue-500" size={16} />
-              <h2>Điểm thu gom gần bạn</h2>
-            </div>
-            <div className="shadow-lg rounded-2xl overflow-hidden border border-slate-200 ring-4 ring-white">
-              <MapWithNoSSR locations={locations} center={userLocation || [21.028511, 105.854444]} />
+              <div className="shadow-lg rounded-2xl overflow-hidden border border-slate-200 ring-4 ring-white">
+                <MapWithNoSSR locations={locations} center={userLocation || [21.028511, 105.854444]} />
+              </div>
             </div>
           </div>
         )}
 
+        {/* Component: WASTE LIST */}
+        {(keyword || activeFilter !== "ALL") && (
+          <WasteList
+            wastes={filteredWastes}
+            loading={loadingWaste}
+            onSelect={setSelectedWaste}
+            onClearFilter={() => setActiveFilter("ALL")}
+            isFiltered={activeFilter !== "ALL"}
+          />
+        )}
       </div>
 
       {/* 3. FOOTER */}
@@ -346,7 +266,13 @@ export default function Home() {
       </footer>
 
       {/* MODAL */}
-      <VillageModal />
+      <VillageModal 
+        isOpen={showVillageModal}
+        onClose={() => setShowVillageModal(false)}
+        groupedVillages={groupedVillages}
+        selectedVillage={selectedVillage}
+        onSelect={setSelectedVillage}
+      />
       <ScheduleDetailModal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
