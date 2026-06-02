@@ -1,0 +1,128 @@
+/* Tắt nền mặc định Leaflet */
+.custom-waste-pin,
+.custom-user-pin,
+.custom-island-pin,
+.custom-island-label {
+    background: none !important;
+    border: none !important;
+}
+
+/* 1. MARKER ĐẢO */
+.custom-island-pin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.island-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #0f172a;
+    border: 2px solid white;
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, .08), 0 4px 10px rgba(0, 0, 0, .15);
+    transition: all .2s ease;
+}
+
+.custom-island-pin:hover .island-dot {
+    transform: scale(1.35);
+    cursor: pointer;
+}
+
+/* 2. LABEL QUẦN ĐẢO (CO GIÃN THEO ZOOM) */
+.custom-island-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.island-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: .3px;
+    text-shadow: 0 0 10px white, 0 0 8px white, 0 0 4px white;
+    white-space: nowrap;
+
+    transform: scale(clamp(0.5, calc(var(--map-zoom) / 6), 1.2));
+    transform-origin: center;
+    transition: transform 0.1s ease-out;
+}
+
+/* 3. USER MARKER (GIỮ NGUYÊN SIZE & HIỆU ỨNG RADAR APPLE MAPS) */
+.user-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, .2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Hiệu ứng sóng radar tỏa ra liên tục */
+    animation: user-pulse 2s infinite;
+}
+
+.user-marker-inner {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #2563eb;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes user-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+}
+
+/* 4. WASTE MARKER (CO GIÃN THEO ZOOM) */
+.waste-marker {
+    background: white;
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
+    border: 1px solid rgba(226, 232, 240, .8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: scale(clamp(0.4, calc(var(--map-zoom) / 14), 1));
+    transform-origin: center;
+    transition: transform 0.1s ease-out;
+}
+
+/* 5. POPUP UI GLASSMORPHISM */
+.modern-popup .leaflet-popup-content-wrapper {
+    border-radius: 16px !important;
+    overflow: hidden;
+    padding: 0 !important;
+    background: rgba(255, 255, 255, .96) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, .15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06) !important;
+}
+
+.modern-popup .leaflet-popup-content {
+    margin: 16px !important;
+    line-height: 1.4 !important;
+}
+
+.modern-popup a.leaflet-popup-close-button {
+    top: 12px !important;
+    right: 12px !important;
+    color: #94a3b8 !important;
+    padding: 4px;
+}
