@@ -12,10 +12,7 @@ export default function ScheduleManager() {
     const [village, setVillage] = useState("");
     const [ward, setWard] = useState("");
 
-    const [scheduleList, setScheduleList] = useState([
-        { day_of_week: 3, time_slot: "16:00", waste_type: "Hữu cơ" },
-        { day_of_week: 5, time_slot: "16:00", waste_type: "Vô cơ" }
-    ]);
+    const [scheduleList, setScheduleList] = useState<any[]>([]);
 
     const [specialList, setSpecialList] = useState<any[]>([]);
 
@@ -31,7 +28,7 @@ export default function ScheduleManager() {
         setVillage(sch.village_name);
         setWard(sch.ward);
         setScheduleList(sch.standard_schedule || []);
-        
+
         const formattedSpecial = (sch.special_events || []).map((e: any) => ({
             ...e,
             start_date: e.start_date ? e.start_date.split('T')[0] : '',
@@ -45,10 +42,7 @@ export default function ScheduleManager() {
     const handleCancel = () => {
         setEditingId(null);
         setVillage(""); setWard("");
-        setScheduleList([
-            { day_of_week: 3, time_slot: "16:00", waste_type: "Hữu cơ" },
-            { day_of_week: 5, time_slot: "16:00", waste_type: "Vô cơ" }
-        ]);
+        setScheduleList([]);
         setSpecialList([]);
     };
 
@@ -227,8 +221,8 @@ export default function ScheduleManager() {
                         </div>
 
                         <button type="submit" className={`w-full font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition shadow-lg ${editingId
-                                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
-                                : "bg-green-600 hover:bg-green-700 text-white shadow-green-200"
+                            ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
+                            : "bg-green-600 hover:bg-green-700 text-white shadow-green-200"
                             }`}>
                             <Save size={18} /> {editingId ? "Cập nhật Lịch" : "Lưu Lịch Mới"}
                         </button>

@@ -19,7 +19,7 @@ export default function WasteDetailModal({ isOpen, onClose, waste }: WasteDetail
     const styleParams = getWasteCategoryStyle(waste.category);
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-300">
 
                 {/* 1. HEADER ẢNH (Image Gallery) */}
@@ -106,7 +106,7 @@ export default function WasteDetailModal({ isOpen, onClose, waste }: WasteDetail
 
                             <div className="space-y-4 relative pl-2">
                                 {/* Đường kẻ dọc nối các bước */}
-                                <div className="absolute left-[19px] top-2 bottom-4 w-0.5 bg-slate-100" />
+                                <div className="absolute left-4.75 top-2 bottom-4 w-0.5 bg-slate-100" />
 
                                 {waste.processing_steps.map((step, idx) => (
                                     <div key={idx} className="relative flex gap-4">

@@ -66,7 +66,6 @@ export default function Map({ locations, center }: MapProps) {
                 <ZoomAwareIslands />
 
                 {/* 1. TẦNG GIỮA: USER MARKER (zIndex: 500) */}
-                {/* Giảm zIndex xuống 500 để nó nằm dưới các điểm thu gom rác */}
                 <Marker position={center} icon={userIcon} zIndexOffset={500}>
                     <Popup className="modern-popup">
                         <div className="p-1 min-w-30 text-center">
@@ -81,8 +80,8 @@ export default function Map({ locations, center }: MapProps) {
                         key={loc._id}
                         position={[loc.location.coordinates[1], loc.location.coordinates[0]]}
                         icon={wasteIcon}
-                        zIndexOffset={1000} /* LUÔN NỔI LÊN TRÊN USER */
-                        riseOnHover={true}  /* Tự động nảy lên lớp cao nhất khi trỏ chuột vào */
+                        zIndexOffset={1000}
+                        riseOnHover={true}
                     >
                         <Popup className="modern-popup">
                             <div className="w-55">

@@ -217,7 +217,7 @@ export default function WasteManager() {
                             <div className="space-y-2">
                                 {images.map((img, idx) => (
                                     <div key={idx} className="flex gap-2 items-center">
-                                        <div className="w-8 h-8 rounded bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                                        <div className="w-8 h-8 rounded bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                             {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={14} /></div>}
                                         </div>
                                         <input
@@ -291,7 +291,7 @@ export default function WasteManager() {
                                         <td className="p-4 align-top">
                                             <div className="flex gap-3">
                                                 {/* Hiển thị ảnh đại diện (ảnh đầu tiên) */}
-                                                <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                                                <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                                     {item.images && item.images.length > 0 ? (
                                                         <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                                                     ) : (

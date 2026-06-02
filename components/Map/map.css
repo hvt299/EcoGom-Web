@@ -1,4 +1,3 @@
-/* Tắt nền mặc định Leaflet */
 .custom-waste-pin,
 .custom-user-pin,
 .custom-island-pin,
@@ -7,7 +6,6 @@
     border: none !important;
 }
 
-/* 1. MARKER ĐẢO */
 .custom-island-pin {
     display: flex;
     justify-content: center;
@@ -30,7 +28,6 @@
     cursor: pointer;
 }
 
-/* 2. LABEL QUẦN ĐẢO (CO GIÃN THEO ZOOM) */
 .custom-island-label {
     display: flex;
     justify-content: center;
@@ -51,7 +48,6 @@
     transition: transform 0.1s ease-out;
 }
 
-/* 3. USER MARKER (GIỮ NGUYÊN SIZE & HIỆU ỨNG RADAR APPLE MAPS) */
 .user-marker {
     width: 24px;
     height: 24px;
@@ -60,8 +56,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* Hiệu ứng sóng radar tỏa ra liên tục */
     animation: user-pulse 2s infinite;
 }
 
@@ -88,7 +82,6 @@
     }
 }
 
-/* 4. WASTE MARKER (CO GIÃN THEO ZOOM) */
 .waste-marker {
     background: white;
     border-radius: 999px;
@@ -104,7 +97,6 @@
     transition: transform 0.1s ease-out;
 }
 
-/* 5. POPUP UI GLASSMORPHISM */
 .modern-popup .leaflet-popup-content-wrapper {
     border-radius: 16px !important;
     overflow: hidden;

@@ -27,7 +27,6 @@ export default function ZoomAwareIslands() {
 
                 return (
                     <Marker key={island.id} position={[island.lat, island.lng]} icon={createDotIcon()}>
-                        {/* ĐÃ FIX: Gỡ bỏ điều kiện zoom >= 6 ở đây. Marker đã hiện là phải click được! */}
                         <Popup className="modern-popup">
                             <div className="w-75">
                                 {/* Header */}
