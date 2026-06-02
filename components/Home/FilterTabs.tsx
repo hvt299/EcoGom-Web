@@ -48,7 +48,7 @@ export default function FilterTabs({ activeFilter, setActiveFilter }: FilterTabs
         <div className="relative mb-6 group">
             {/* Nút lùi (Trái) */}
             {showLeftArrow && (
-                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 flex items-center">
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-white to-transparent z-10 flex items-center">
                     <button
                         onClick={() => scroll("left")}
                         className="bg-white shadow-md border border-slate-100 p-1.5 rounded-full text-slate-600 hover:text-green-600 hover:border-green-200 transition-all active:scale-95"
@@ -89,7 +89,7 @@ export default function FilterTabs({ activeFilter, setActiveFilter }: FilterTabs
 
             {/* Nút tiến (Phải) */}
             {showRightArrow && (
-                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 flex items-center justify-end">
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-white to-transparent z-10 flex items-center justify-end">
                     <button
                         onClick={() => scroll("right")}
                         className="bg-white shadow-md border border-slate-100 p-1.5 rounded-full text-slate-600 hover:text-green-600 hover:border-green-200 transition-all active:scale-95"
